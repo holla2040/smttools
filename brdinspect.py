@@ -32,16 +32,14 @@ def help():
     print("H        - home")
     print("")
 
-
-elements = {}
+os.system("clear")
+help()
 
 ser = serial.Serial(port,250000,bytesize=8,parity='N',stopbits=1,timeout=10.0)
-os.system("clear")
-
 ser.write("M203 X2000.00 Y2000.00\n");
 ser.flush()
 
-
+elements = {}
 for element in root.iter('element'):
     # elements[element.attrib['name']] = {'name':element.attrib['name'],'x':element.attrib['x'],'y':element.attrib['y']} 
     elements[element.attrib['name']] = element.attrib
@@ -54,6 +52,8 @@ for k in sorted(elements.keys()):
 
 
 kb = kbhit.kbhit()
+
+lastx = 0
 
 for i in range(1,16):
     band = []
@@ -75,10 +75,13 @@ for i in range(1,16):
         print(e)
         ser.write("G90\n");
         ser.write("G0 X%f Y%f\n"%(e[1],e[2]))
+
         ser.flush()
         while True:
             if auto:
-                time.sleep(1.0)
+                d = abs(lastx - e[1])/30.0 + 1.0
+                lastx = e[1]
+                time.sleep(d)
                 if not kb.available():
                     break
             if kb.available():
