@@ -1,0 +1,17 @@
+#!/bin/bash
+
+echo "M203 X2000.00 Y2000.00" > /dev/ttyACM0
+
+while [ 1 ]; do
+  read -p ": " ref
+
+  if [ -z $ref ]; then
+    exit 0
+  fi
+
+  if [ $ref == "00" ]; then
+    echo "G0X0Y0Z15" > /dev/ttyACM0
+  else
+    grep "element.*name.*\"${ref^^}\"" *.brd | awk -F\" '{print "G0X"$10"Y"$12}' | tee /dev/ttyACM0
+  fi
+done
